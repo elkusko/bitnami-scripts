@@ -6,7 +6,6 @@ if [ `id|sed -e s/uid=//g -e s/\(.*//g` -ne 0 ]; then
     exit 1
 fi
 
-
 # Disabling SELinux if enabled
 if [ -f "/usr/sbin/getenforce" ] && [ `id -u` = 0 ] ; then
     selinux_status=`/usr/sbin/getenforce`
@@ -98,9 +97,12 @@ echo "Updating permissions $APPHTDOCSDIR"
 find $APPHTDOCSDIR/ -type f -exec chmod 664 {} \;
 find $APPHTDOCSDIR/ -type d -exec chmod 755 {} \;
 
-
 echo "Restart Apache"
 $INSTALLDIR/ctlscript.sh restart apache
 
-
 echo "Custom PHP Application Added: $NEWAPP"
+
+# Restoring SELinux
+if [ -f "/usr/sbin/getenforce" ] && [ `id -u` = 0 ] ; then
+    /usr/sbin/setenforce $selinux_status 2> /dev/null
+fi
